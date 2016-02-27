@@ -87,9 +87,8 @@ just in a single test module.  Normally one would need to do this:
     $ cd ../../to/root/of/workspace
     python3 -m unittests discover -p "*test_mytests*"
 
-With `pith` you can be in the unittest folder and just give it the .py filename:
+With `pith`, you just give it the .py filename:
 
-    $ cd module_a/tests
     $ pith test_mytests.py
     Entering directory: /some/root/path/of/workspace
     python3 -m unittests -p module_a.tests.test_mytests  # FIXME

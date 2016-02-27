@@ -1,0 +1,11 @@
+[pithrc]
+
+interpreter = python2
+
+verbose = 0
+
+# additional paths
+
+pythonpath = 
+
+    git_submodules/exteral_workspace
