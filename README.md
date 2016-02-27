@@ -32,11 +32,11 @@ approach for getting the imports correct can be difficult.
 
 ## The `setpaths.py` anti-pattern
 
-At my place of work, we develop complex tools that has evolved into many
+At my place of work, we develop complex tools that have evolved into many
 submodules and packages.  The `runscripts` folder contains many scripts that
 launch servies and batch process data.
 
-Suppose there is a script several subfolders deep `runscripts`:
+Suppose there is a script several folders deep in `runscripts`:
 
     runscripts/nhilton/run_batch_job.py
 
@@ -53,33 +53,36 @@ that the imports work:
     import module_a.fun_1
     import module_b.fun_3
 
-This is an anti-pattern!  It's complicated, request a build system to generate,
+This is an anti-pattern!  It's complicated, requires a build system to generate,
 requires developers to remember to 'import setpaths' in the correct place, may
 get complicated if a local module is also importing a their own `setpaths`
 modules.
 
 ## The solution: `pith`
 
-`pith` remove the need to PYTHONPATH hacks like generated `setpaths`.  `pith` works
-by always launching the python interpreter from the root of the workspace:
+`pith` removes the need to manipulate the PYTHONPATH, like those generated
+`setpaths`.  `pith` works by always launching the python interpreter from the
+root of the workspace and use module names:
 
 ```bash
-$ `pith` runscripts/nhilton/run_batch_job.py
+$ pith runscripts/nhilton/run_batch_job.py        # in BASH, use tab complete!
 Entering directory: /some/root/path/of/workspace
 python3 -m runscripts.nhilton.run_batch_job
 # ...
 ```
 
-Even better, if you are in a subdirectory:
+Even better, if you are in a subdirectory, there's no need to `cd` up first:
 
     $ cd runscripts/nhilton
-    $ `pith` run_batch_job.py
-    Entering directory: /some/root/path/of/workspace
+    $ pith run_batch_job.py
+    Entering directory: /some/root/path/of/workspace    # the same as before
     python3 -m runscripts.nhilton.run_batch_job
 
-You will always get a consistent way to execute the script.  This is especially
-useful if you are inside a unittest folder and want to run just the tests in
-a single module.  Normally one would need to do this:
+By executing the code in the root of the workspace, you will always get
+consistent import behavior.
+
+This is especially useful if you are inside a unittest folder and want to run
+just in a single test module.  Normally one would need to do this:
 
     $ cd ../../to/root/of/workspace
     python3 -m unittests discover -p "*test_mytests*"
@@ -87,7 +90,6 @@ a single module.  Normally one would need to do this:
 With `pith` you can be in the unittest folder and just give it the .py filename:
 
     $ cd module_a/tests
-    $ `pith` test_mytests.py
+    $ pith test_mytests.py
     Entering directory: /some/root/path/of/workspace
-    python3 -m unittests -p module_a.tests.test_mytests
-
+    python3 -m unittests -p module_a.tests.test_mytests  # FIXME
