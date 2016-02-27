@@ -10,10 +10,14 @@ See https://github.com/weegreenblobbie/pith-tool
 
 import ConfigParser
 import os
+import platform
 import sys
+import subprocess
 
 
 def main():
+
+    run_dir = os.getcwd()
 
     #--------------------------------------------------------------------------
     # search for .pithrc
@@ -45,7 +49,7 @@ def main():
         py_exe = 'python'
 
     try:
-        verbose = config.get('pithrc', 'verbose').lower() == 'true'
+        verbose = config.getboolean('pithrc', 'verbose')
 
     except ConfigParser.NoOptionError:
         verbose = True
@@ -62,9 +66,7 @@ def main():
         print_settings(root_dir, py_exe, python_path)
 
     #--------------------------------------------------------------------------
-    # handle arguments
-
-    print "sys.argv = ", sys.argv
+    # handle no arguments, dump setttings and exit
 
     if len(sys.argv) == 1:
 
@@ -72,7 +74,36 @@ def main():
 
         if not verbose:
             print_settings(root_dir, py_exe, python_path)
-            sys.exit(1)
+
+        sys.exit(1)
+
+    #--------------------------------------------------------------------------
+    # setup PYTHONPATH in env
+
+    path_sep = ':'
+
+    if 'win32' in platform.system():
+        path_sep = ';'
+
+    ppaths = path_sep.join(python_path)
+
+    env = os.environ.copy()
+    env['PYTHONPATH'] = ppaths
+
+    #--------------------------------------------------------------------------
+    # get command line arguments
+
+    args = make_py_commnad(root_dir, run_dir)
+
+    cmd = [py_exe]
+    cmd.extend(args)
+
+    if verbose:
+        print(" ".join(cmd))
+
+    subprocess.check_call(cmd, env = env)
+
+
 
 
 def scan_for_pithrc():
@@ -147,6 +178,44 @@ def print_settings(root_dir, py_exe, python_path):
 
     for p in python_path:
         print('    %s' % p)
+
+
+def make_py_commnad(root_dir, run_dir):
+    """
+    gobble up sys.argv and transform into propery python module command.
+    """
+
+    # run_dir must start with root dir
+
+    if not run_dir.startswith(root_dir):
+        raise RuntimeError("oops, what's going on:\n%s\n%s\n" % (
+            root_dir, run_dir)
+        )
+
+    run_dir = run_dir[len(root_dir) + 1 :]
+
+    args = []
+
+    found_script = False
+
+    for arg in sys.argv[1:]:
+
+        if arg.endswith('.py') and not found_script:
+
+            arg = os.path.join(run_dir, arg)
+
+            [arg, _] = os.path.splitext(arg)
+
+            arg = arg.replace(os.path.sep, '.')
+
+            args.extend(['-m', arg])
+
+            found_script = True
+
+        else:
+            args.append(arg)
+
+    return args
 
 
 #------------------------------------------------------------------------------
