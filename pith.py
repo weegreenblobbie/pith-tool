@@ -9,10 +9,11 @@ See https://github.com/weegreenblobbie/pith-tool
 """
 
 import ConfigParser
+import glob
 import os
 import platform
-import sys
 import subprocess
+import sys
 
 
 def main():
@@ -75,6 +76,8 @@ def main():
         if not verbose:
             print_settings(root_dir, py_exe, python_path)
 
+        print("Nothing to do!")
+
         sys.exit(1)
 
     #--------------------------------------------------------------------------
@@ -93,17 +96,48 @@ def main():
     #--------------------------------------------------------------------------
     # get command line arguments
 
-    args = make_py_commnad(root_dir, run_dir)
+    args, paths = make_py_commnad(root_dir, run_dir)
 
     cmd = [py_exe]
     cmd.extend(args)
 
+    #--------------------------------------------------------------------------
+    # python3 doesn't require __init__.py files to be everywhere
+    # python2 does.
+
+    ver = subprocess.check_output(
+        [py_exe, '--version'], stderr=subprocess.STDOUT)
+
+    is_py2 = 'Python 2.' in ver
+
+    init_files = []
+
+    if is_py2:
+        init_files = make_init_py_files(paths)
+
+    #--------------------------------------------------------------------------
+    # finally, execute python
+
     if verbose:
         print(" ".join(cmd))
 
-    subprocess.check_call(cmd, env = env)
+    if is_py2 and len(init_files) > 0:
 
+        reraise = False
 
+        try:
+            subprocess.check_call(cmd, env = env)
+        except:
+            reraise = True
+
+        # clean up __init__.py files
+        cleanup_init_file(init_files)
+
+        if reraise:
+            raise
+
+    else:
+        subprocess.check_call(cmd, env = env)
 
 
 def scan_for_pithrc():
@@ -195,6 +229,7 @@ def make_py_commnad(root_dir, run_dir):
     run_dir = run_dir[len(root_dir) + 1 :]
 
     args = []
+    paths = []
 
     found_script = False
 
@@ -206,16 +241,56 @@ def make_py_commnad(root_dir, run_dir):
 
             [arg, _] = os.path.splitext(arg)
 
-            arg = arg.replace(os.path.sep, '.')
+            mod = arg.replace(os.path.sep, '.')
 
-            args.extend(['-m', arg])
+            args.extend(['-m', mod])
 
             found_script = True
+
+            # save the paths to this script so for python2, temporary
+            # __init__.py files can be created
+
+            dirname = os.path.dirname(arg)
+
+            while len(dirname) > 0:
+                paths.append(dirname)
+                dirname = os.path.dirname(dirname)
 
         else:
             args.append(arg)
 
-    return args
+    return args, paths
+
+
+def make_init_py_files(paths):
+    """
+    For each path, if __init__.py doesn't exist write out a temporary one.
+    """
+
+    filelist = []
+
+    for p in paths:
+
+        init = os.path.join(p, '__init__.py')
+
+        if not os.path.isfile(init):
+
+            filelist.append(init)
+
+            with open(init, 'w') as fd:
+                fd.write('')
+
+    return filelist
+
+
+def cleanup_init_file(init_files):
+
+    for init in init_files:
+
+        filelist = glob.glob(init + '*') # pick up .pyc and .pyo extensions
+
+        for f in filelist:
+            os.remove(f)
 
 
 #------------------------------------------------------------------------------
