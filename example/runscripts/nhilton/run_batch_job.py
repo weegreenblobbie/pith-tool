@@ -1,18 +1,18 @@
-import module_a.fun_1 as fun_1
-import module_c.fun_4 as fun_4
+from module_a.fun_1 import fun_1
+from module_c.fun_4 import fun_4
 
-import external_module_a.extra_fun as extra_fun
+from external_a.extra_fun import extra_fun
 
 
 def main():
 
-    print('Run batch job ...')
+    print('Running batch job ...')
 
     fun_1()
     fun_4()
     extra_fun()
 
-    print('batch job done!')
+    print('batch job complete!')
 
 
 if __name__ == "__main__":

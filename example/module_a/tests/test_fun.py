@@ -1,10 +1,10 @@
 import unittest
 
-import module_a.fun_1 as fun_1
-import module_a.fun_2 as fun_2
+from module_a.fun_1 import fun_1
+from module_a.fun_2 import fun_2
 
 
-class Test1(untitest.TestCase):
+class Test1(unittest.TestCase):
 
     def test_01(self):
         "test 1.1"
@@ -15,7 +15,7 @@ class Test1(untitest.TestCase):
         fun_1()
 
 
-class Test2(untitest.TestCase):
+class Test2(unittest.TestCase):
 
     def test_01(self):
         "test 2.1"

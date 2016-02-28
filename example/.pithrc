@@ -1,11 +1,13 @@
 [pithrc]
 
-interpreter = python2
+interpreter = python3
 
-verbose = 0
+echo = 1
+verbose = 1
 
 # additional paths
 
-pythonpath = 
+pythonpath =
 
-    git_submodules/exteral_workspace
+    git_submodules/external_workspace
+

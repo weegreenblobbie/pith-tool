@@ -41,25 +41,40 @@ def main():
     #--------------------------------------------------------------------------
     # parse .pithrc
 
+    # defaults
+
+    echo = True
+    path_str = ''
+    py_exe = 'python'
+    test_prefix = 'test'
+    verbose = True
+
     config = read_pithrc(pith_rc)
 
     try:
-        py_exe = config.get('pithrc', 'interpreter')
-
+        echo = config.getboolean('pithrc', 'echo')
     except ConfigParser.NoOptionError:
-        py_exe = 'python'
-
-    try:
-        verbose = config.getboolean('pithrc', 'verbose')
-
-    except ConfigParser.NoOptionError:
-        verbose = True
+        pass
 
     try:
         path_str = config.get('pithrc', 'pythonpath')
-
     except ConfigParser.NoOptionError:
-        path_str = ''
+        pass
+
+    try:
+        py_exe = config.get('pithrc', 'interpreter')
+    except ConfigParser.NoOptionError:
+        pass
+
+    try:
+        test_prefix = config.get('pithrc', 'test_prefix').strip()
+    except ConfigParser.NoOptionError:
+        pass
+
+    try:
+        verbose = config.getboolean('pithrc', 'verbose')
+    except ConfigParser.NoOptionError:
+        pass
 
     python_path = parse_python_path(root_dir, path_str)
 
@@ -96,7 +111,7 @@ def main():
     #--------------------------------------------------------------------------
     # get command line arguments
 
-    args, paths = make_py_commnad(root_dir, run_dir)
+    args, paths = make_py_commnad(root_dir, run_dir, test_prefix)
 
     cmd = [py_exe]
     cmd.extend(args)
@@ -113,12 +128,18 @@ def main():
     init_files = []
 
     if is_py2:
-        init_files = make_init_py_files(paths)
+        init_files = make_init_py_files(paths, verbose)
 
     #--------------------------------------------------------------------------
     # finally, execute python
 
-    if verbose:
+    # show the command unless echo is disabled
+
+    if echo:
+
+        if not verbose:
+            print('Entering directory: %s' % root_dir)
+
         print(" ".join(cmd))
 
     if is_py2 and len(init_files) > 0:
@@ -131,7 +152,7 @@ def main():
             reraise = True
 
         # clean up __init__.py files
-        cleanup_init_file(init_files)
+        cleanup_init_file(init_files, verbose)
 
         if reraise:
             raise
@@ -214,7 +235,7 @@ def print_settings(root_dir, py_exe, python_path):
         print('    %s' % p)
 
 
-def make_py_commnad(root_dir, run_dir):
+def make_py_commnad(root_dir, run_dir, test_prefix):
     """
     gobble up sys.argv and transform into propery python module command.
     """
@@ -226,7 +247,7 @@ def make_py_commnad(root_dir, run_dir):
             root_dir, run_dir)
         )
 
-    run_dir = run_dir[len(root_dir) + 1 :]
+#~    run_dir = run_dir[len(root_dir) + 1 :]
 
     args = []
     paths = []
@@ -235,15 +256,28 @@ def make_py_commnad(root_dir, run_dir):
 
     for arg in sys.argv[1:]:
 
-        if arg.endswith('.py') and not found_script:
+        dot_py = arg.endswith('.py')
+        is_test = os.path.basename(arg).startswith(test_prefix)
 
-            arg = os.path.join(run_dir, arg)
+        if not found_script and (dot_py or is_test):
 
-            [arg, _] = os.path.splitext(arg)
+            # abspath here to remove possible '/../../'
+            arg = os.path.abspath(os.path.join(run_dir, arg))
+
+            # strip off root_dir
+
+            arg = arg[len(root_dir) + 1 :]
+
+            # pull off .py
+            if dot_py:
+                [arg, _] = os.path.splitext(arg)
 
             mod = arg.replace(os.path.sep, '.')
 
-            args.extend(['-m', mod])
+            if is_test:
+                args.extend(['-m', 'unittest', mod])
+            else:
+                args.extend(['-m', mod])
 
             found_script = True
 
@@ -262,7 +296,7 @@ def make_py_commnad(root_dir, run_dir):
     return args, paths
 
 
-def make_init_py_files(paths):
+def make_init_py_files(paths, verbose):
     """
     For each path, if __init__.py doesn't exist write out a temporary one.
     """
@@ -277,19 +311,26 @@ def make_init_py_files(paths):
 
             filelist.append(init)
 
+            if verbose:
+                print('Touching %s' % init)
+
             with open(init, 'w') as fd:
                 fd.write('')
 
     return filelist
 
 
-def cleanup_init_file(init_files):
+def cleanup_init_file(init_files, verbose):
 
     for init in init_files:
 
         filelist = glob.glob(init + '*') # pick up .pyc and .pyo extensions
 
         for f in filelist:
+
+            if verbose:
+                print('Cleaning up %s' % f)
+
             os.remove(f)
 
 
