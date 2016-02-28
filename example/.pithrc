@@ -1,6 +1,6 @@
-[pithrc]
+[pith]
 
-interpreter = python3
+interpreter = python
 
 echo = 1
 verbose = 1

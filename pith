@@ -52,27 +52,27 @@ def main():
     config = read_pithrc(pith_rc)
 
     try:
-        echo = config.getboolean('pithrc', 'echo')
+        echo = config.getboolean('pith', 'echo')
     except ConfigParser.NoOptionError:
         pass
 
     try:
-        path_str = config.get('pithrc', 'pythonpath')
+        path_str = config.get('pith', 'pythonpath')
     except ConfigParser.NoOptionError:
         pass
 
     try:
-        py_exe = config.get('pithrc', 'interpreter')
+        py_exe = config.get('pith', 'interpreter')
     except ConfigParser.NoOptionError:
         pass
 
     try:
-        test_prefix = config.get('pithrc', 'test_prefix').strip()
+        test_prefix = config.get('pith', 'test_prefix').strip()
     except ConfigParser.NoOptionError:
         pass
 
     try:
-        verbose = config.getboolean('pithrc', 'verbose')
+        verbose = config.getboolean('pith', 'verbose')
     except ConfigParser.NoOptionError:
         pass
 
@@ -82,7 +82,7 @@ def main():
         print_settings(root_dir, py_exe, python_path)
 
     #--------------------------------------------------------------------------
-    # handle no arguments, dump setttings and exit
+    # handle no arguments, dump settings and exit
 
     if len(sys.argv) == 1:
 
