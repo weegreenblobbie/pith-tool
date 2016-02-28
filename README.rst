@@ -30,24 +30,29 @@ under development.  Suppose you have a workspace with the following directories:
 With all the different modules, unittests, and run scripts, coming up with the
 approach for getting the imports correct can be difficult.
 
-## The `setpaths.py` anti-pattern
+The `setpaths.py` anti-pattern
+------------------------------
 
 At my place of work, we develop complex tools that have evolved into many
 submodules and packages.  The `runscripts` folder contains many scripts that
 launch servies and batch process data.
 
-Suppose there is a script several folders deep in `runscripts`:
+Suppose there is a script several folders deep in `runscripts`::
 
     runscripts/nhilton/run_batch_job.py
 
 How should this script manipulate the PYTHONPATH so that the script can write:
+
+.. code-block:: python
 
     import module_a.fun_1
     import module_b.fun_3
 
 My place of work uses make/scons to generate a set of `setpaths.py` in each of
 the runscripts sub folders, whose pusrpose is the manipulate the PYTHONPATH so
-that the imports work:
+that the imports work::
+
+.. code-block:: python
 
     import setpaths
     import module_a.fun_1
@@ -58,20 +63,23 @@ requires developers to remember to 'import setpaths' in the correct place, may
 get complicated if a local module is also importing a their own `setpaths`
 modules.
 
-## The solution: `pith`
+The solution: `pith`
+--------------------
 
 `pith` removes the need to manipulate the PYTHONPATH, like those generated
 `setpaths`.  `pith` works by always launching the python interpreter from the
 root of the workspace and use module names:
 
-```bash
-$ pith runscripts/nhilton/run_batch_job.py        # in BASH, use tab complete!
-Entering directory: /some/root/path/of/workspace
-python3 -m runscripts.nhilton.run_batch_job
-# ...
-```
+.. code-block:: console
+
+    $ pith runscripts/nhilton/run_batch_job.py        # in BASH, use tab complete!
+    Entering directory: /some/root/path/of/workspace
+    python3 -m runscripts.nhilton.run_batch_job
+    # ...
 
 Even better, if you are in a subdirectory, there's no need to `cd` up first:
+
+.. code-block:: console
 
     $ cd runscripts/nhilton
     $ pith run_batch_job.py
@@ -84,10 +92,14 @@ consistent import behavior.
 This is especially useful if you are inside a unittest folder and want to run
 just in a single test module.  Normally one would need to do this:
 
+.. code-block:: console
+
     $ cd ../../to/root/of/workspace
     python3 -m unittests discover -p "*test_mytests*"
 
 With `pith`, you just give it the .py filename:
+
+.. code-blocK:: console
 
     $ pith test_mytests.py
     Entering directory: /some/root/path/of/workspace
