@@ -35,7 +35,7 @@ approach for getting the imports correct can be difficult.
 The ``setpaths.py`` anti-pattern
 --------------------------------
 
-At my place of work, we develop complex tools that have evolved into many
+At my workplace, we develop complex tools that have evolved into many
 submodules and packages.  The ``runscripts`` folder contains many scripts that
 launch servers and batch process data.
 
@@ -43,14 +43,14 @@ Suppose there is a script several folders deep in ``runscripts``::
 
     runscripts/nhilton/run_batch_job.py
 
-How should this script manipulate the ``PYTHONPATH`` so that these imports work?:
+How should this script manipulate the ``PYTHONPATH`` so that these imports work?
 
 .. code-block:: python
 
     import module_a.fun_1
     import module_b.fun_3
 
-My place of work uses make/scons to generate a set of ``setpaths.py`` helper
+My workplace uses make/scons to generate a set of ``setpaths.py`` helper
 modules that manipulate the ``PYTHONPATH``, each one is different because each
 one is in a different directory.  The ``setpaths.py`` module manipulates
 ``sys.path`` so the imports work:
@@ -147,11 +147,11 @@ The following are the allowed key value pairs
 =========================  ===================================
 Key                        Value Description
 =========================  ===================================
-echo                       Echo the full python command to the terminal (true)
-interpreter                The python executable to use (python)
-test_prefix                The prefix to check if a .py file is a unit test (test)
-verbose                    Echo lots of information as pith executes (true)
-pythonpath                 A string of paths to include in the ``PYTHONPATH``, relative paths are okay, one per line
+echo                       Echo the full python command to the terminal (default = true)
+interpreter                The python executable to use (default = python)
+test_prefix                The prefix to check if a .py file is a unit test (default = test)
+verbose                    Echo lots of information as pith executes (default = true)
+pythonpath                 A string of paths to include in the ``PYTHONPATH``, relative paths are okay, one per line (no default)
 =========================  ===================================
 
 Example ``.pithrc`` file
@@ -166,10 +166,9 @@ Example ``.pithrc`` file
     echo = 1
     verbose = 1
 
-    # additional paths
+    # additional paths, 1 per line
 
     pythonpath =
-
         git_submodules/external_workspace
 
 
