@@ -172,5 +172,5 @@ Example ``.pithrc`` file
         git_submodules/external_workspace
 
 
-See the example directory in this repo with a toy project that matches the
+See the ``example`` directory in this repo with a toy project that matches the
 examples in this README.

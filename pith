@@ -275,7 +275,10 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
             mod = arg.replace(os.path.sep, '.')
 
             if is_test:
-                args.extend(['-m', 'unittest', mod])
+                temp = ['-m', 'unittest']
+                temp.extend(args)
+                temp.append(mod)
+                args = temp
             else:
                 args.extend(['-m', mod])
 
