@@ -8,7 +8,7 @@ See https://github.com/weegreenblobbie/pith-tool
 
 from setuptools import setup, Extension
 
-# README.rst processing
+# pypi.rst processing
 
 with open("pypi.rst") as fd:
     readme_rst = fd.read()

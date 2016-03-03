@@ -11,7 +11,7 @@ See https://github.com/weegreenblobbie/pith-tool
 __author__ = "Nick Hilton"
 __copyright__ = "Copyright 2016 - Present, Nick Hilton et al."
 __license__ = "The MIT License (MIT)"
-__version__ = "0.2"
+__version__ = "0.3-rc4"
 
 
 try:

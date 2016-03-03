@@ -1,0 +1,6 @@
+include LICENSE
+include README.rst
+include pith
+include pith.py
+include pypi.rst
+include setup.py

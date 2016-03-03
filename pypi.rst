@@ -24,5 +24,6 @@ Or:
 
     pip3 install --user pith
 
-
+Then make sure ``pith`` is in your shell's ``PATH``, it's usually installed
+into ``~/.local/bin``.
 
