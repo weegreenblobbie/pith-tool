@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 """
 pith tool
@@ -8,7 +8,11 @@ A simple command-line tool to execute Python while taking care of the PYTHONPATH
 See https://github.com/weegreenblobbie/pith-tool
 """
 
-import ConfigParser
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+
 import glob
 import os
 import platform
@@ -54,32 +58,32 @@ def main():
 
     try:
         backtrace = config.getboolean('pith', 'backtrace')
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     try:
         echo = config.getboolean('pith', 'echo')
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     try:
         path_str = config.get('pith', 'pythonpath')
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     try:
         py_exe = config.get('pith', 'interpreter')
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     try:
         test_prefix = config.get('pith', 'test_prefix').strip()
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     try:
         verbose = config.getboolean('pith', 'verbose')
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         pass
 
     python_path = parse_python_path(root_dir, path_str)
@@ -129,6 +133,8 @@ def main():
     ver = subprocess.check_output(
         [py_exe, '--version'], stderr=subprocess.STDOUT)
 
+    ver = ver.decode('ascii')
+
     is_py2 = 'Python 2.' in ver
 
     init_files = []
@@ -152,8 +158,8 @@ def main():
 
     try:
         subprocess.check_call(cmd, env = env)
-    except Exception as error:
-        pass
+    except Exception as e:
+        error = e
 
     if is_py2:
         cleanup_init_file(init_files, verbose)
@@ -195,7 +201,7 @@ def scan_for_pithrc():
 
 def read_pithrc(pith_rc):
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.read(pith_rc)
 
     return config
