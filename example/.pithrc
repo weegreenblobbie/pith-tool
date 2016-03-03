@@ -3,7 +3,8 @@
 interpreter = python
 
 echo = 1
-verbose = 1
+verbose = 0
+backtrace = 0
 
 # additional paths
 

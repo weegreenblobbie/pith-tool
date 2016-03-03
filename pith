@@ -244,35 +244,60 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
 
     if not run_dir.startswith(root_dir):
         raise RuntimeError("oops, what's going on:\n%s\n%s\n" % (
-            root_dir, run_dir)
+            root_dir,
+            run_dir)
         )
 
-#~    run_dir = run_dir[len(root_dir) + 1 :]
+    os.chdir(run_dir) # so relative path lookup works
 
     args = []
     paths = []
 
-    found_script = False
+    print('-' * 80)
 
     for arg in sys.argv[1:]:
 
-        dot_py = arg.endswith('.py')
+        print "arg = ", arg
+
+        # convert any file argument into an absolute path
+
+        is_path = os.path.exists(arg)
+        is_dot_py = False
+        is_test = False
         is_test = os.path.basename(arg).startswith(test_prefix)
 
-        if not found_script and (dot_py or is_test):
+        if is_path or is_test:
+            arg = os.path.abspath(arg)
 
-            # abspath here to remove possible '/../../'
-            arg = os.path.abspath(os.path.join(run_dir, arg))
+            # is regular .py file?
+            is_dot_py = arg.endswith('.py')
 
-            # strip off root_dir
+        #---------------------------------------------------------------------
+        # check if this is a unit test
 
+
+
+        print "arg = ", arg
+        print "is_path = ", is_path
+        print "is_dot_py = ", is_dot_py
+        print "is_test = ", is_test
+
+        # strip off root dir if possible
+
+        if arg.startswith(root_dir):
             arg = arg[len(root_dir) + 1 :]
 
+        print "arg = ", arg
+
+        if is_dot_py or is_test:
+
             # pull off .py
-            if dot_py:
+            if is_dot_py:
                 [arg, _] = os.path.splitext(arg)
 
             mod = arg.replace(os.path.sep, '.')
+
+            print "mod = ", mod
 
             if is_test:
                 temp = ['-m', 'unittest']
@@ -281,8 +306,6 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
                 args = temp
             else:
                 args.extend(['-m', mod])
-
-            found_script = True
 
             # save the paths to this script so for python2, temporary
             # __init__.py files can be created
@@ -294,7 +317,12 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
                 dirname = os.path.dirname(dirname)
 
         else:
+
+            print('not py file or unittest: %s' % arg)
+
             args.append(arg)
+
+    os.chdir(root_dir)
 
     return args, paths
 
