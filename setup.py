@@ -10,7 +10,7 @@ from setuptools import setup, Extension
 
 # README.rst processing
 
-with open("README.rst") as fd:
+with open("pypi.rst") as fd:
     readme_rst = fd.read()
 
 keywords = '''
@@ -38,6 +38,8 @@ A simple command-line tool to execute Python while taking care of the
 PYTHONPATH.
 """
 
+from pith import __version__ as pith_version
+
 setup(
     author           = "Nick Hilton et al",
     author_email     = "weegreenblobbie@yahoo.com",
@@ -48,6 +50,6 @@ setup(
     name             = "pith",
 #~    py_modules       = [],
     scripts          = ['pith'],
-    url              = "http://nsound.sourceforge.net",
-    version          = "0.1",
+    url              = "https://github.com/weegreenblobbie/pith-tool",
+    version          = pith_version,
 )
