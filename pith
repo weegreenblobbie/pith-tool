@@ -8,6 +8,12 @@ A simple command-line tool to execute Python while taking care of the PYTHONPATH
 See https://github.com/weegreenblobbie/pith-tool
 """
 
+__author__ = "Nick Hilton"
+__copyright__ = "Copyright 2016 - Present, Nick Hilton et al."
+__license__ = "The MIT License (MIT)"
+__version__ = "0.2"
+
+
 try:
     import ConfigParser as configparser
 except ImportError:
@@ -97,6 +103,8 @@ def main():
     if len(sys.argv) == 1:
 
         # nothing to do, report settings (if not already reported) and exit
+
+        print("pith-" + __version__)
 
         if not verbose:
             print_settings(root_dir, py_exe, python_path)
