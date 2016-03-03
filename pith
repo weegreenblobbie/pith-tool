@@ -48,8 +48,14 @@ def main():
     py_exe = 'python'
     test_prefix = 'test'
     verbose = True
+    backtrace = False
 
     config = read_pithrc(pith_rc)
+
+    try:
+        backtrace = config.getboolean('pith', 'backtrace')
+    except ConfigParser.NoOptionError:
+        pass
 
     try:
         echo = config.getboolean('pith', 'echo')
@@ -142,23 +148,24 @@ def main():
 
         print(" ".join(cmd))
 
-    if is_py2 and len(init_files) > 0:
+    error = None
 
-        reraise = False
+    try:
+        subprocess.check_call(cmd, env = env)
+    except Exception as error:
+        pass
 
-        try:
-            subprocess.check_call(cmd, env = env)
-        except:
-            reraise = True
-
-        # clean up __init__.py files
+    if is_py2:
         cleanup_init_file(init_files, verbose)
 
-        if reraise:
+    if error:
+
+        if backtrace:
             raise
 
-    else:
-        subprocess.check_call(cmd, env = env)
+        else:
+            sys.exit(error.returncode)
+
 
 
 def scan_for_pithrc():
@@ -253,11 +260,11 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
     args = []
     paths = []
 
-    print('-' * 80)
+#~    print('-' * 80)
 
     for arg in sys.argv[1:]:
 
-        print "arg = ", arg
+#~        print "arg = ", arg
 
         # convert any file argument into an absolute path
 
@@ -275,19 +282,17 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
         #---------------------------------------------------------------------
         # check if this is a unit test
 
-
-
-        print "arg = ", arg
-        print "is_path = ", is_path
-        print "is_dot_py = ", is_dot_py
-        print "is_test = ", is_test
+#~        print "arg = ", arg
+#~        print "is_path = ", is_path
+#~        print "is_dot_py = ", is_dot_py
+#~        print "is_test = ", is_test
 
         # strip off root dir if possible
 
         if arg.startswith(root_dir):
             arg = arg[len(root_dir) + 1 :]
 
-        print "arg = ", arg
+#~        print "arg = ", arg
 
         if is_dot_py or is_test:
 
@@ -297,7 +302,7 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
 
             mod = arg.replace(os.path.sep, '.')
 
-            print "mod = ", mod
+#~            print "mod = ", mod
 
             if is_test:
                 temp = ['-m', 'unittest']
@@ -318,7 +323,7 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
 
         else:
 
-            print('not py file or unittest: %s' % arg)
+#~            print('not py file or unittest: %s' % arg)
 
             args.append(arg)
 
