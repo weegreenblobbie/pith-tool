@@ -11,7 +11,7 @@ See https://github.com/weegreenblobbie/pith-tool
 __author__ = "Nick Hilton"
 __copyright__ = "Copyright 2016 - Present, Nick Hilton et al."
 __license__ = "The MIT License (MIT)"
-__version__ = "0.3"
+__version__ = "0.4"
 
 
 try:
@@ -388,7 +388,7 @@ def cleanup_init_file(init_files, verbose):
 # globals
 
 PITH_RC_TEMPLATE = """\
-[pithrc]
+[pith]
 
 interpreter = python
 
