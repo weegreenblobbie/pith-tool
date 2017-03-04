@@ -285,7 +285,8 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
         is_path = os.path.exists(arg)
         is_dot_py = False
         is_test = False
-        is_test = os.path.basename(arg).startswith(test_prefix)
+        is_dir = os.path.isdir(arg)
+        is_test = not is_dir and os.path.basename(arg).startswith(test_prefix)
 
         if is_path or is_test:
             arg = os.path.abspath(arg)
