@@ -162,6 +162,7 @@ def main():
 
         print(" ".join(cmd))
 
+    ecode = 1
     error = None
 
     try:
