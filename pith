@@ -165,21 +165,22 @@ def main():
     error = None
 
     try:
-        subprocess.check_call(cmd, env = env)
+        ecode = subprocess.check_call(cmd, env = env)
     except Exception as e:
         error = e
 
     if is_py2:
         cleanup_init_file(init_files, verbose)
 
-    if error:
+    if error or ecode != 0:
 
+        # show backtrace from pith that check_call failed, can be confusing
+        # so default is False
         if backtrace:
             raise
 
         else:
-            sys.exit(error.returncode)
-
+            sys.exit(ecode)
 
 
 def scan_for_pithrc():
@@ -223,6 +224,9 @@ def parse_python_path(root_dir, path_str):
 
     This should should become a list of strings of absolute paths.
     """
+
+    if path_str == '':
+        return [root_dir]
 
     paths = path_str.strip().split('\n')
 
@@ -274,10 +278,11 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
     args = []
     paths = []
 
-#~    print('-' * 80)
+    target = None
 
     for arg in sys.argv[1:]:
 
+#~        print('-' * 80)
 #~        print "arg = ", arg
 
         # convert any file argument into an absolute path
@@ -309,7 +314,7 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
 
 #~        print "arg = ", arg
 
-        if is_dot_py or is_test:
+        if target is None and is_dot_py or is_test:
 
             # pull off .py
             if is_dot_py:
@@ -318,6 +323,8 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
             mod = arg.replace(os.path.sep, '.')
 
 #~            print "mod = ", mod
+
+            target = mod
 
             if is_test:
                 temp = ['-m', 'unittest']
@@ -332,15 +339,23 @@ def make_py_commnad(root_dir, run_dir, test_prefix):
 
             dirname = os.path.dirname(arg)
 
+#~            print("dirname = %s" % repr(dirname))
+
             while len(dirname) > 0:
                 paths.append(dirname)
                 dirname = os.path.dirname(dirname)
 
+#~                print("paths = %s" % repr(paths))
+#~                print("dirname = %s" % repr(dirname))
+#~                count += 1
+#~                if count > 20:
+#~                    raise RuntimeError('breaking out of loop')
+
         else:
+            args.append(arg)
 
 #~            print('not py file or unittest: %s' % arg)
 
-            args.append(arg)
 
     os.chdir(root_dir)
 
